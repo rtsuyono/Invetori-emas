@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmasKalkulator - Aplikasi Hitung Emas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #D4AF37;
+            --secondary: #FFD700;
+            --dark: #1A1A1A;
+            --light: #F8F9FA;
+            --success: #28A745;
+            --danger: #DC3545;
+            --info: #17A2B8;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--secondary);
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            color: var(--dark);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #fff;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: var(--dark);
+        }
+        
+        .btn-primary:hover {
+            background: #c19d2e;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .profit {
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .loss {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        
+        .filter-section {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .summary-card {
+            background: #e6f7ff;
+            border-left: 4px solid var(--info);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--light);
+            text-align: center;
+            padding: 10px;
+            font-size: 0.8rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 0;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ced4da;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 750px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-coins"></i> EmasKalkulator</h1>
+            <p>Aplikasi Penghitung Pembelian & Penjualan Emas</p>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="pembelian">Pembelian</button>
+            <button class="tab-btn" data-tab="penjualan">Penjualan</button>
+            <button class="tab-btn" data-tab="laporan">Laporan</button>
+        </div>
+        
+        <!-- Tab Pembelian -->
+        <div id="pembelian" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Form Pembelian Emas</h2>
+                <form id="form-pembelian">
+                    <div class="form-group">
+                        <label for="p-tanggal">Tanggal Pembelian</label>
+                        <input type="date" id="p-tanggal" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="p-nama">Nama Barang</label>
+                        <input type="text" id="p-nama" placeholder="Contoh: Cincin Kawin" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="p-karat">Karat (%)</label>
+                        <select id="p-karat" required>
+                            <option value="24">24K (99.9%)</option>
+                            <option value="22">22K (91.6%)</option>
+                            <option value="18" selected>18K (75.0%)</option>
+                            <option value="14">14K (58.3%)</option>
+                            <option value="10">10K (41.7%)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="p-gram">Berat (Gram)</label>
+                        <input type="number" id="p-gram" step="0.01" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="p-harga">Harga Beli per Gram (Rp)</label>
+                        <input type="number" id="p-harga" placeholder="Contoh: 1000000" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="p-jumlah">Jumlah Barang</label>
+                        <input type="number" id="p-jumlah" value="1" min="1" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Simpan Pembelian
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-list"></i> Daftar Pembelian</h2>
+                <div id="daftar-pembelian">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama</th>
+                                <th>Karat</th>
+                                <th>Gram</th>
+                                <th>Harga</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pembelian-body">
+                            <!-- Data pembelian akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="empty-pembelian" class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>Belum ada data pembelian</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Penjualan -->
+        <div id="penjualan" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-cash-register"></i> Form Penjualan Emas</h2>
+                <form id="form-penjualan">
+                    <div class="form-group">
+                        <label for="j-tanggal">Tanggal Penjualan</label>
+                        <input type="date" id="j-tanggal" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-nama">Nama Barang</label>
+                        <input type="text" id="j-nama" placeholder="Contoh: Gelang Tangan" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-karat">Karat (%)</label>
+                        <select id="j-karat" required>
+                            <option value="24">24K (99.9%)</option>
+                            <option value="22">22K (91.6%)</option>
+                            <option value="18" selected>18K (75.0%)</option>
+                            <option value="14">14K (58.3%)</option>
+                            <option value="10">10K (41.7%)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-gram">Berat (Gram)</label>
+                        <input type="number" id="j-gram" step="0.01" placeholder="0.00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-harga-beli">Harga Beli per Gram (Rp)</label>
+                        <input type="number" id="j-harga-beli" placeholder="Harga saat pembelian" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-harga-jual">Harga Jual per Gram (Rp)</label>
+                        <input type="number" id="j-harga-jual" placeholder="Harga saat penjualan" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="j-jumlah">Jumlah Barang</label>
+                        <input type="number" id="j-jumlah" value="1" min="1" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle"></i> Simpan Penjualan
+                    </button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Daftar Penjualan</h2>
+                <div id="daftar-penjualan">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama</th>
+                                <th>Karat</th>
+                                <th>Gram</th>
+                                <th>Harga Jual</th>
+                                <th>Laba/Rugi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="penjualan-body">
+                            <!-- Data penjualan akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="empty-penjualan" class="empty-state">
+                        <i class="fas fa-file-excel"></i>
+                        <p>Belum ada data penjualan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab Laporan -->
+        <div id="laporan" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-line"></i> Laporan Rugi Laba</h2>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-filter"></i> Filter Laporan</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-tanggal">Tanggal</label>
+                            <input type="date" id="filter-tanggal">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-nama">Nama Barang</label>
+                            <input type="text" id="filter-nama" placeholder="Cari nama barang">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-karat">Karat</label>
+                            <select id="filter-karat">
+                                <option value="">Semua Karat</option>
+                                <option value="24">24K</option>
+                                <option value="22">22K</option>
+                                <option value="18">18K</option>
+                                <option value="14">14K</option>
+                                <option value="10">10K</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary" id="btn-filter">
+                                <i class="fas fa-search"></i> Terapkan Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <h3><i class="fas fa-chart-pie"></i> Ringkasan Keuangan</h3>
+                    <div class="summary-item">
+                        <span>Total Pembelian:</span>
+                        <span class="summary-value" id="total-pembelian">Rp 0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Penjualan:</span>
+                        <span class="summary-value" id="total-penjualan">Rp 0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Laba/Rugi:</span>
+                        <span class="summary-value" id="total-laba-rugi">Rp 0</span>
+                    </div>
+                </div>
+                
+                <div id="daftar-laporan">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama</th>
+                                <th>Karat</th>
+                                <th>Gram</th>
+                                <th>Harga Beli</th>
+                                <th>Harga Jual</th>
+                                <th>Laba/Rugi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="laporan-body">
+                            <!-- Data laporan akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="empty-laporan" class="empty-state">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <p>Tidak ada data laporan</p>
+                    </div>
+                </div>
+                
+                <div class="report-actions">
+                    <button class="btn btn-success" id="btn-wa">
+                        <i class="fab fa-whatsapp"></i> Share via WA
+                    </button>
+                    <button class="btn btn-danger" id="btn-pdf">
+                        <i class="fas fa-file-pdf"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>EmasKalkulator &copy; 2023 | Aplikasi Hitung Emas</p>
+    </footer>
+
+    <script>
+        // Data storage
+        let pembelianData = JSON.parse(localStorage.getItem('pembelianData')) || [];
+        let penjualanData = JSON.parse(localStorage.getItem('penjualanData')) || [];
+        
+        // DOM elements
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Tab navigation
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('p-tanggal').value = today;
+        document.getElementById('j-tanggal').value = today;
+        document.getElementById('filter-tanggal').value = today;
+        
+        // Format currency
+        function formatRupiah(angka) {
+            return 'Rp ' + angka.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        
+        // Pembelian form submission
+        document.getElementById('form-pembelian').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const pembelian = {
+                id: Date.now(),
+                tanggal: document.getElementById('p-tanggal').value,
+                nama: document.getElementById('p-nama').value,
+                karat: document.getElementById('p-karat').value,
+                gram: parseFloat(document.getElementById('p-gram').value),
+                harga: parseInt(document.getElementById('p-harga').value),
+                jumlah: parseInt(document.getElementById('p-jumlah').value),
+                total: parseFloat(document.getElementById('p-gram').value) * 
+                      parseInt(document.getElementById('p-harga').value) * 
+                      parseInt(document.getElementById('p-jumlah').value)
+            };
+            
+            pembelianData.push(pembelian);
+            localStorage.setItem('pembelianData', JSON.stringify(pembelianData));
+            
+            // Reset form
+            this.reset();
+            document.getElementById('p-tanggal').value = today;
+            
+            // Refresh pembelian list
+            renderPembelian();
+            
+            alert('Data pembelian berhasil disimpan!');
+        });
+        
+        // Penjualan form submission
+        document.getElementById('form-penjualan').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const gram = parseFloat(document.getElementById('j-gram').value);
+            const hargaBeli = parseInt(document.getElementById('j-harga-beli').value);
+            const hargaJual = parseInt(document.getElementById('j-harga-jual').value);
+            const jumlah = parseInt(document.getElementById('j-jumlah').value);
+            
+            const totalHargaBeli = gram * hargaBeli * jumlah;
+            const totalHargaJual = gram * hargaJual * jumlah;
+            const labaRugi = totalHargaJual - totalHargaBeli;
+            
+            const penjualan = {
+                id: Date.now(),
+                tanggal: document.getElementById('j-tanggal').value,
+                nama: document.getElementById('j-nama').value,
+                karat: document.getElementById('j-karat').value,
+                gram: gram,
+                harga_beli: hargaBeli,
+                harga_jual: hargaJual,
+                jumlah: jumlah,
+                total_beli: totalHargaBeli,
+                total_jual: totalHargaJual,
+                laba_rugi: labaRugi
+            };
+            
+            penjualanData.push(penjualan);
+            localStorage.setItem('penjualanData', JSON.stringify(penjualanData));
+            
+            // Reset form
+            this.reset();
+            document.getElementById('j-tanggal').value = today;
+            
+            // Refresh penjualan list
+            renderPenjualan();
+            
+            alert('Data penjualan berhasil disimpan!');
+        });
+        
+        // Render pembelian data
+        function renderPembelian() {
+            const tbody = document.getElementById('pembelian-body');
+            const emptyState = document.getElementById('empty-pembelian');
+            
+            if (pembelianData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+            
+            pembelianData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.tanggal}</td>
+                    <td>${item.nama}</td>
+                    <td>${item.karat}K</td>
+                    <td>${item.gram} gr</td>
+                    <td>${formatRupiah(item.harga)}</td>
+                    <td>${formatRupiah(item.total)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Render penjualan data
+        function renderPenjualan() {
+            const tbody = document.getElementById('penjualan-body');
+            const emptyState = document.getElementById('empty-penjualan');
+            
+            if (penjualanData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+            
+            penjualanData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.tanggal}</td>
+                    <td>${item.nama}</td>
+                    <td>${item.karat}K</td>
+                    <td>${item.gram} gr</td>
+                    <td>${formatRupiah(item.harga_jual)}</td>
+                    <td class="${item.laba_rugi >= 0 ? 'profit' : 'loss'}">
+                        ${formatRupiah(item.laba_rugi)}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Filter and render laporan
+        function renderLaporan() {
+            const tbody = document.getElementById('laporan-body');
+            const emptyState = document.getElementById('empty-laporan');
+            const tanggalFilter = document.getElementById('filter-tanggal').value;
+            const namaFilter = document.getElementById('filter-nama').value.toLowerCase();
+            const karatFilter = document.getElementById('filter-karat').value;
+            
+            // Filter data
+            const filteredData = penjualanData.filter(item => {
+                return (!tanggalFilter || item.tanggal === tanggalFilter) &&
+                       (!namaFilter || item.nama.toLowerCase().includes(namaFilter)) &&
+                       (!karatFilter || item.karat === karatFilter);
+            });
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                document.getElementById('total-pembelian').textContent = 'Rp 0';
+                document.getElementById('total-penjualan').textContent = 'Rp 0';
+                document.getElementById('total-laba-rugi').textContent = 'Rp 0';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            tbody.innerHTML = '';
+            
+            let totalPembelian = 0;
+            let totalPenjualan = 0;
+            let totalLabaRugi = 0;
+            
+            filteredData.forEach(item => {
+                totalPembelian += item.total_beli;
+                totalPenjualan += item.total_jual;
+                totalLabaRugi += item.laba_rugi;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.tanggal}</td>
+                    <td>${item.nama}</td>
+                    <td>${item.karat}K</td>
+                    <td>${item.gram} gr</td>
+                    <td>${formatRupiah(item.harga_beli)}</td>
+                    <td>${formatRupiah(item.harga_jual)}</td>
+                    <td class="${item.laba_rugi >= 0 ? 'profit' : 'loss'}">
+                        ${formatRupiah(item.laba_rugi)}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('total-pembelian').textContent = formatRupiah(totalPembelian);
+            document.getElementById('total-penjualan').textContent = formatRupiah(totalPenjualan);
+            document.getElementById('total-laba-rugi').textContent = formatRupiah(totalLabaRugi);
+            document.getElementById('total-laba-rugi').className = totalLabaRugi >= 0 ? 'summary-value profit' : 'summary-value loss';
+        }
+        
+        // Apply filter button
+        document.getElementById('btn-filter').addEventListener('click', renderLaporan);
+        
+        // WhatsApp sharing
+        document.getElementById('btn-wa').addEventListener('click', function() {
+            const tanggal = document.getElementById('filter-tanggal').value || 'Semua Tanggal';
+            const nama = document.getElementById('filter-nama').value || 'Semua Barang';
+            const karat = document.getElementById('filter-karat').value || 'Semua Karat';
+            const totalPembelian = document.getElementById('total-pembelian').textContent;
+            const totalPenjualan = document.getElementById('total-penjualan').textContent;
+            const totalLabaRugi = document.getElementById('total-laba-rugi').textContent;
+            
+            const message = `Laporan Emas\n\n` +
+                           `*Filter:*\n` +
+                           `Tanggal: ${tanggal}\n` +
+                           `Nama Barang: ${nama}\n` +
+                           `Karat: ${karat}\n\n` +
+                           `*Ringkasan:*\n` +
+                           `Total Pembelian: ${totalPembelian}\n` +
+                           `Total Penjualan: ${totalPenjualan}\n` +
+                           `Total Laba/Rugi: ${totalLabaRugi}\n\n` +
+                           `Laporan dibuat oleh EmasKalkulator`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+        });
+        
+        // PDF download
+        document.getElementById('btn-pdf').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(18);
+            doc.text('Laporan Emas', 105, 15, { align: 'center' });
+            
+            // Add filter info
+            doc.setFontSize(12);
+            const tanggal = document.getElementById('filter-tanggal').value || 'Semua Tanggal';
+            const nama = document.getElementById('filter-nama').value || 'Semua Barang';
+            const karat = document.getElementById('filter-karat').value || 'Semua Karat';
+            
+            doc.text(`Filter: Tanggal ${tanggal}, Nama ${nama}, Karat ${karat}`, 14, 25);
+            
+            // Add summary
+            doc.setFontSize(14);
+            doc.text('Ringkasan Keuangan', 14, 35);
+            
+            doc.setFontSize(12);
+            doc.text(`Total Pembelian: ${document.getElementById('total-pembelian').textContent}`, 14, 45);
+            doc.text(`Total Penjualan: ${document.getElementById('total-penjualan').textContent}`, 14, 55);
+            
+            const labaRugi = document.getElementById('total-laba-rugi').textContent;
+            const labaRugiClass = document.getElementById('total-laba-rugi').classList.contains('profit') ? '#28A745' : '#DC3545';
+            doc.setTextColor(labaRugiClass);
+            doc.text(`Total Laba/Rugi: ${labaRugi}`, 14, 65);
+            doc.setTextColor('#000000');
+            
+            // Add table
+            doc.autoTable({
+                startY: 75,
+                head: [['Tanggal', 'Nama', 'Karat', 'Gram', 'Harga Beli', 'Harga Jual', 'Laba/Rugi']],
+                body: Array.from(document.querySelectorAll('#laporan-body tr')).map(row => {
+                    return Array.from(row.cells).map(cell => {
+                        // Remove color classes from laba/rugi
+                        if (cell.classList.contains('profit') || cell.classList.contains('loss')) {
+                            return cell.textContent;
+                        }
+                        return cell.textContent;
+                    });
+                }),
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [212, 175, 55] }
+            });
+            
+            // Save the PDF
+            doc.save('laporan-emas.pdf');
+        });
+        
+        // Initial render
+        renderPembelian();
+        renderPenjualan();
+        renderLaporan();
+    </script>
+</body>
+</html>
